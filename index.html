@@ -199,7 +199,7 @@ header.top .wrap{display:flex;align-items:center;justify-content:space-between;g
 .inter{padding-block:18px 6px}
 .entrada{padding-block:22px 8px}
 .entrada .wrap{display:grid;gap:12px}
-#entrada{scroll-margin-top:70px}
+#destaque{scroll-margin-top:70px}
 .ecard{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);background:var(--band);color:var(--band-fg);border-radius:var(--r);overflow:hidden}
 .ecard .eimg{background:#fff;position:relative;cursor:pointer;min-height:420px}
 .ecard .eimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:14px}
@@ -456,9 +456,9 @@ footer a{color:var(--accent-ink)}
   </div>
 </section>
 
-<section class="entrada" id="entrada" aria-labelledby="t-entrada">
+<section class="entrada" id="destaque" aria-labelledby="t-entrada">
   <div class="wrap">
-    <div class="sec-tit"><h2 id="t-entrada">Porta de entrada <em>em destaque</em></h2><a href="#catalogo" data-ver-cat="Porta Entrada">Ver todas →</a></div>
+    <div class="sec-tit"><h2 id="t-entrada">Porta de correr <em>em destaque</em></h2><a href="#catalogo" data-ver-cat="Porta Correr">Ver todas →</a></div>
     <div id="entrada-d"></div>
   </div>
 </section>
@@ -715,20 +715,19 @@ const gg=document.getElementById("giro-g"); gg.innerHTML=giroHTML();
 gg.addEventListener("click",e=>{ const card=e.target.closest(".gcard"); if(!card) return; const id=card.dataset.id;
   const b=e.target.closest("[data-cor]"); if(b){ corGiro[id]=b.dataset.cor; gg.innerHTML=giroHTML(); return; }
   if(e.target.closest("[data-abrir]")) abrirProduto(id,false,"Premium",corGiro[id]||"Branco"); });
-/* porta de entrada em destaque: Premium, sem vidro lateral */
-const ENT_ID="Porta Entrada|Lambril c/ Puxador — Sem Vidro Lateral"; let corEnt="Branco";
-function entradaHTML(){ const m=MODELOS.find(x=>x.id===ENT_ID); if(!m) return "";
-  const fl=fotosLinha(m,"Premium"), cores=["Branco","Preto"].filter(c=>m.vars.some(v=>v.linha==="Premium"&&v.cor===c));
-  const f=fl[fotoPara(fl,corEnt)], vs=m.vars.filter(v=>v.linha==="Premium"&&v.cor===corEnt), pmin=Math.min(...vs.map(v=>v.preco));
-  const aviso=fotoCorDif(f,corEnt)?`<span class="aviso-foto">Foto em outra cor. O preço é da cor escolhida.</span>`:"";
-  return `<div class="ecard"><div class="eimg" data-abrir><img src="${img(f.f)}" alt="Porta de entrada lambril com puxador, Linha Premium" loading="lazy">${aviso}</div>
-    <div class="ein"><span class="etag">Linha Premium</span><h3>Lambril com puxador</h3><p>Porta de entrada de abrir, toda em lambril, com puxador comprido. Sem vidro lateral.</p>
-      <div class="gcores">${cores.map(c=>`<button type="button" data-cor="${c}" aria-pressed="${c===corEnt}"><span class="dot ${c}"></span>${c==="Preto"?"Preta":"Branca"}</button>`).join("")}</div>
-      <div class="gpreco"><small>a partir de</small><b class="num">${brl(vistaDe(pmin))} <i class="av">à vista</i></b><span class="num">${txtParc(pmin)}</span><span class="gmed">${txtMedidas([...new Set(vs.filter(v=>v.preco===pmin).map(v=>v.medida))])}</span></div>
+/* porta de entrada (slide do banner): Premium, sem vidro lateral */
+const ENT_ID="Porta Entrada|Lambril c/ Puxador — Sem Vidro Lateral";
+/* destaque: Porta de Correr 3 Planos, Linha Premium, só na branca sem travessa (os cards e a ficha mostram as três cores) */
+const DEST_ID="Porta Correr|3 Planos";
+function destaqueHTML(){ const m=MODELOS.find(x=>x.id===DEST_ID); if(!m) return "";
+  const vs=m.vars.filter(v=>v.linha==="Premium"&&v.cor==="Branco"&&v.extra==="Sem Travessa"); if(!vs.length) return "";
+  const pmin=Math.min(...vs.map(v=>v.preco)), fl=fotosLinha(m,"Premium"), f=fl.find(x=>x.f==="14-00")||fl[fotoPara(fl,"Branco","Sem Travessa")];
+  return `<div class="ecard"><div class="eimg" data-abrir><img src="${img(f.f)}" alt="Porta de correr 3 planos branca, Linha Premium" loading="lazy"></div>
+    <div class="ein"><span class="etag">Linha Premium</span><h3>Porta de correr 3 planos</h3><p>Três folhas de vidro que correm uma sobre a outra e abrem bem o vão. Na cor branca, sem travessa.</p>
+      <div class="gpreco"><small>branca, a partir de</small><b class="num">${brl(vistaDe(pmin))} <i class="av">à vista</i></b><span class="num">${txtParc(pmin)}</span><span class="gmed">${txtMedidas([...new Set(vs.filter(v=>v.preco===pmin).map(v=>v.medida))])}, sem travessa</span></div>
       <button type="button" class="btn-add" data-abrir>Escolher medida</button></div></div>`; }
-const ed=document.getElementById("entrada-d"); ed.innerHTML=entradaHTML();
-ed.addEventListener("click",e=>{ const b=e.target.closest("[data-cor]"); if(b){ corEnt=b.dataset.cor; ed.innerHTML=entradaHTML(); return; }
-  if(e.target.closest("[data-abrir]")) abrirProduto(ENT_ID,false,"Premium",corEnt); });
+const ed=document.getElementById("entrada-d"); ed.innerHTML=destaqueHTML();
+ed.addEventListener("click",e=>{ if(e.target.closest("[data-abrir]")) abrirProduto(DEST_ID,false,"Premium","Branco"); });
 /* linha intermediária */
 const inter=MODELOS.filter(m=>m.linhas.includes("Intermediária")&&fotosLinha(m,"Intermediária").length).sort((a,b)=>minLinha(a,"Intermediária")-minLinha(b,"Intermediária"));
 document.getElementById("inter-d").innerHTML = inter.map(m=>cardHTML(m,false,"Intermediária")).join("");
@@ -749,7 +748,7 @@ const minEnt = cor => Math.min(...entVs(cor).map(v=>v.preco));
 const medEnt = cor => txtMedidas([...new Set(entVs(cor).filter(v=>v.preco===minEnt(cor)).map(v=>v.medida))]);
 const SLIDES = [
   {eye:"As mais vendidas", tit:'Portas de giro <em>palheta, social e basculante</em>', sub:"Na cor branca ou brilhante, com preço de cada medida na tela. Escolha e peça pelo WhatsApp.", im1:"02-02", im2:"00-02", tag:"Porta de giro brilhante a partir de", valor:Math.min(...GIRO.map(([id])=>minCor(id,"Alumínio"))), vista:true, med:medGiro("Alumínio"), alvo:"giro", cta:"Ver portas de giro"},
-  {eye:"Porta de entrada", tit:'Lambril <em>com puxador</em>', sub:"Linha Premium, sem vidro lateral, na cor branca ou preta. Veja o preço de cada medida.", im1:"07-00", im2:"07-00", uma:true, tag:"Porta de entrada branca a partir de", valor:minEnt("Branco"), vista:true, med:medEnt("Branco"), alvo:"entrada", cta:"Ver porta de entrada"},
+  {eye:"Porta de entrada", tit:'Lambril <em>com puxador</em>', sub:"Linha Premium, sem vidro lateral, na cor branca ou preta. Veja o preço de cada medida.", im1:"07-00", im2:"07-00", uma:true, tag:"Porta de entrada branca a partir de", valor:minEnt("Branco"), vista:true, med:medEnt("Branco"), abrir:ENT_ID, cta:"Ver porta de entrada"},
   {eye:"Janelas com o melhor preço", tit:'Linha <em>Intermediária</em>', sub:"Vitrôs e venezianas mais em conta, com foto e preço de cada medida.", im1:"in-05", im2:"in-05", uma:true, tag:"Vitro 4 Folhas branco", valor:vitro4.preco, vista:true, med:txtMedidas([vitro4.medida])+", sem grade", alvo:"intermediaria", cta:"Ver Linha Intermediária"},
   {eye:"Condição de pagamento", tit:'Até <em>10x sem juros</em> no cartão', sub:"Ou 5% de desconto pagando à vista. Entrega em Sorocaba em até 15 dias úteis.", im1:"01-02", im2:"02-02", tag:"Porta de giro brilhante", valor:Math.min(...GIRO.map(([id])=>minCor(id,"Alumínio"))), med:medGiro("Alumínio"), alvo:"giro", cta:"Ver portas de giro"},
 ];
@@ -782,7 +781,7 @@ document.querySelectorAll("[data-hseta]").forEach(b=>b.addEventListener("click",
 function reinicia(){ clearInterval(slideTimer); if(!reduz) slideTimer=setInterval(()=>mostraSlide((slideAtual+1)%SLIDES.length,true),6500); }
 document.getElementById("h-zap").innerHTML = ICON_ZAP+" Comprar pelo WhatsApp";
 document.getElementById("h-zap").href = zapLink("Olá, Moreira! Vim pelo site e quero comprar.");
-document.getElementById("h-cta").addEventListener("click",e=>{e.preventDefault(); document.getElementById(SLIDES[slideAtual].alvo||"catalogo").scrollIntoView({behavior:"smooth"});});
+document.getElementById("h-cta").addEventListener("click",e=>{e.preventDefault(); const sl=SLIDES[slideAtual]; if(sl.abrir){ abrirProduto(sl.abrir,false,"Premium","Branco"); return; } document.getElementById(sl.alvo||"catalogo").scrollIntoView({behavior:"smooth"});});
 document.querySelector(".sec-tit a").addEventListener("click",e=>{e.preventDefault(); catAtual=""; montarChips(); render(); document.getElementById("catalogo").scrollIntoView({behavior:"smooth"});});
 mostraSlide(0,false); reinicia();
 
