@@ -603,7 +603,8 @@ const ordMed = (a,b)=>{const A=medNum(a),B=medNum(b);return A[0]-B[0]||A[1]-B[1]
 const extraValido = e => e && e!=="—" && e!=="Não";
 const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const slug = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-const zapLink = t => `https://wa.me/${ZAP}?text=${encodeURIComponent(t)}`;
+const MARCA_SITE = "(pelo site)";
+const zapLink = t => `https://wa.me/${ZAP}?text=${encodeURIComponent(t.includes(MARCA_SITE) ? t : t + "\n\n" + MARCA_SITE)}`;
 const img = (f,p) => `img/${f}${p?"-p":""}.jpg`;
 
 /* modelos */
