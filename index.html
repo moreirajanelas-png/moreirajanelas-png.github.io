@@ -404,6 +404,30 @@ footer a{color:var(--accent-ink)}
 .faq summary{cursor:pointer;font-weight:700;padding:13px 0;min-height:44px}
 .faq details p{margin:0 0 14px;color:var(--muted)}
 .faq a{color:var(--accent-ink);font-weight:700}
+
+/* Black Friday */
+.hero.bf{background:radial-gradient(110% 90% at 85% 40%,#3a2a1c 0%,#16120f 55%,#000 100%)}
+.hero.bf h1 em{background:#E8650A;color:#fff}
+.hero.bf .eyebrow{color:#F59A1E}
+.selo-preco .de{font-size:13px;font-weight:600;opacity:.8;text-decoration:line-through}
+.selo-preco .bf-fx{display:inline-block;background:#E8650A;color:#fff;font-weight:800;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:6px;margin-bottom:5px;justify-self:start}
+.tag-bf{position:absolute;left:10px;top:10px;z-index:2;background:#000;color:#fff;font-weight:800;font-size:12px;letter-spacing:.04em;text-transform:uppercase;padding:6px 9px;border-radius:8px;border:2px solid #E8650A;line-height:1}
+.tag-bf b{color:#F59A1E}
+.tag-bf{white-space:nowrap}@media (max-width:760px){.tag-bf{font-size:10px;padding:4px 6px;left:6px;top:6px}}
+.bf-box{background:#000;color:#fff;border-radius:12px;padding:10px 12px;display:grid;gap:2px;line-height:1.2}
+.bf-box .t{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#F59A1E}
+.bf-box .de{font-size:13px;opacity:.75;text-decoration:line-through}
+.bf-box b{font-family:var(--display);font-size:30px;line-height:1;color:#fff}
+.bf-box b i{font-style:normal;font-size:14px;font-family:inherit;font-weight:600;opacity:.85}
+.bf-box .pz{font-size:13px;font-weight:700;color:#5BD08A}
+.bf-box .obs{font-size:11.5px;opacity:.75}
+.gpreco.normal small{font-size:12px}
+.card .bf-linha{display:block;margin-top:6px;background:#000;color:#fff;border-radius:8px;padding:5px 8px;font-size:12.5px;font-weight:700;line-height:1.25}
+.card .bf-linha em{font-style:normal;color:#F59A1E}
+.opt .bf-mini{font-style:normal;font-size:10px;font-weight:800;background:#000;color:#F59A1E;border-radius:4px;padding:1px 4px;margin-left:5px;vertical-align:1px}
+.condicoes .bf-cond{display:block;line-height:1.35;background:#000;color:#fff;border-radius:10px;padding:8px 10px}
+.condicoes .bf-cond b{color:#F59A1E}
+.item .bf-it{display:inline-block;font-size:10px;font-weight:800;background:#000;color:#F59A1E;border-radius:4px;padding:1px 5px;margin-left:4px}
 </style>
 <style>img{max-width:100%}</style>
 </head>
@@ -607,6 +631,22 @@ const MARCA_SITE = "(pelo site)";
 const zapLink = t => `https://wa.me/${ZAP}?text=${encodeURIComponent(t.includes(MARCA_SITE) ? t : t + "\n\n" + MARCA_SITE)}`;
 const img = (f,p) => `img/${f}${p?"-p":""}.jpg`;
 
+/* BLACK FRIDAY — 23/11 a 30/11/2026 (horário de Brasília). Sai do ar sozinha à meia-noite de 30/11 para 01/12.
+   Vale só para: portas de giro Palheta, Social e Basculante, Linha Premium, 2,10 x 0,80, branca e brilhante.
+   10% à vista (Pix, dinheiro ou débito) ou 5% em até 10x sem juros no cartão. A tabela DADOS não muda.
+   Fora do site oficial (prévia), a promoção aparece sempre, para conferência. */
+const BF_INICIO = new Date("2026-11-23T00:00:00-03:00"), BF_FIM = new Date("2026-12-01T00:00:00-03:00");
+const BF_PREVIA = !/moreirajanelas-png\.github\.io$/.test(location.hostname);
+const bfAtivo = () => { const n=new Date(); return BF_PREVIA || (n>=BF_INICIO && n<BF_FIM); };
+const BF_MODELOS = new Set(["Palheta","Social Palheta","Basculante Palheta"]), BF_MEDIDA = "2,10x0,80", BF_CORES = ["Branco","Alumínio"];
+const BF_VISTA = 0.10, BF_PRAZO = 0.05, BF_PERIODO = "23 a 30/11";
+const ehBF = x => !!x && bfAtivo() && x.categoria==="Porta Giro" && BF_MODELOS.has(x.modelo) && x.linha==="Premium" && x.medida===BF_MEDIDA && BF_CORES.includes(x.cor);
+/* x = variação (ou item do carrinho); valores sempre sem centavos, para baixo */
+const vistaX = (x,q=1) => ehBF(x) ? Math.floor(cheio(x.preco)*q*(1-BF_VISTA)+1e-6) : vistaDe(cheio(x.preco)*q);
+const prazoX = (x,q=1) => ehBF(x) ? Math.floor(cheio(x.preco)*q*(1-BF_PRAZO)+1e-6) : cheio(x.preco)*q;
+const parcX  = (x,q=1) => prazoX(x,q)/PARCELAS;
+const bfVar = (m,cor) => m && m.vars.find(v=>ehBF({...v,categoria:m.categoria,modelo:m.modelo}) && v.cor===cor);
+
 /* modelos */
 const MODELOS = [];
 (function(){
@@ -685,6 +725,7 @@ function cardHTML(m, destaque, linha){
     const lst = fotosLinha(m, linha || linhaPadrao(m));
     const fi = fotoPara(lst,"Branco","Sem Grade"), f1 = lst[fi], f2 = lst.find((f,i)=>i!==fi && temGrade(f)===temGrade(f1));
     const pc = precoCard(m,linha), pmin = pc.v, fGrade = temGrade(f1) && pc.ext==="sem grade";
+    const bfc = (!linha||linha==="Premium") && pc.l==="Premium" && bfVar(m,pc.cor), bfcx = bfc && {...bfc,categoria:m.categoria,modelo:m.modelo};
     const avisoCard = [fGrade?"Foto com grade":"", fotoCorDif(f1,pc.cor)?"Foto em outra cor":""].filter(Boolean).join(" · ");
     return `
     <a class="card" href="#${m.slug}" data-id="${esc(m.id)}"${linha?` data-linha="${linha}"`:""}>
@@ -692,7 +733,7 @@ function cardHTML(m, destaque, linha){
         <img src="${img(f1.f,f1===m.fotos[0]||f1.f==="in-04")}" alt="${esc(nomeCompleto(m))}" loading="lazy" decoding="async">
         ${f2?`<img class="alt" src="${img(f2.f)}" alt="" loading="lazy" decoding="async">`:""}
         <div class="cores">${m.cores.map(c=>`<span class="dot ${c}" title="${corNome(c)}"></span>`).join("")}</div>
-        ${destaque?`<span class="tag-dest">Mais pedido</span>`:linha?`<span class="tag-linha">Linha ${linha}</span>`:""}
+        ${bfc?`<span class="tag-bf">Black Friday <b>-10%</b></span>`:destaque?`<span class="tag-dest">Mais pedido</span>`:linha?`<span class="tag-linha">Linha ${linha}</span>`:""}
         ${lst.length>1?`<span class="nfotos">${lst.length} fotos</span>`:""}
         ${avisoCard?`<span class="foto-linha">${avisoCard}</span>`:""}
       </div>
@@ -700,7 +741,7 @@ function cardHTML(m, destaque, linha){
         <div class="cat">${esc(m.categoria)}</div>
         <div class="nome">${esc(m.modelo)}</div>
         ${!linha && m.linhas.filter(l=>l!=="—"&&l!==pc.l).length ? `<div class="linhas">Também na ${m.linhas.filter(l=>l!=="—"&&l!==pc.l).map(l=>"Linha "+l).join(" e ")}</div>` : ""}
-        <div class="preco"><small class="pc-ref">${pc.l!=="—"&&!linha?"Linha "+pc.l+", ":""}${COR_TXT[pc.cor]}</small><small>a partir de</small><b class="num">${brl(vistaDe(pmin))} <i class="av">à vista</i></b><span class="parc num">${txtParc(pmin)}</span><span class="pc-med num">${pc.med}${pc.ext?", "+pc.ext:""}</span>${fGrade&&pc.comGrade?`<span class="pc-foto num">Com grade, como na foto: ${brl(vistaDe(pc.comGrade))} à vista</span>`:""}</div>
+        <div class="preco"><small class="pc-ref">${pc.l!=="—"&&!linha?"Linha "+pc.l+", ":""}${COR_TXT[pc.cor]}</small><small>a partir de</small><b class="num">${brl(vistaDe(pmin))} <i class="av">à vista</i></b><span class="parc num">${txtParc(pmin)}</span><span class="pc-med num">${pc.med}${pc.ext?", "+pc.ext:""}</span>${bfc?`<span class="bf-linha num"><em>Black Friday:</em> 2,10 x 0,80 por ${brl(vistaX(bfcx))} à vista</span>`:""}${fGrade&&pc.comGrade?`<span class="pc-foto num">Com grade, como na foto: ${brl(vistaDe(pc.comGrade))} à vista</span>`:""}</div>
       </div>
     </a>`;
 }
@@ -714,20 +755,22 @@ function giroHTML(){
   return GIRO.map(([id,nome,desc])=>{ const m=MODELOS.find(x=>x.id===id); if(!m) return "";
     const cor = corGiro[id] || "Branco"; const fl=fotosLinha(m,"Premium"); const f=fl[fotoPara(fl,cor)];
     const vs=m.vars.filter(v=>v.linha==="Premium"&&v.cor===cor); const pmin=Math.min(...vs.map(v=>v.preco));
+    const bf=bfVar(m,cor), bfx=bf&&{...bf,categoria:m.categoria,modelo:m.modelo}, outras=vs.filter(v=>v.medida!==BF_MEDIDA), omin=Math.min(...outras.map(v=>v.preco));
     const med=[...new Set(vs.filter(v=>v.preco===pmin).map(v=>v.medida))]; const alt=new Set(med.map(x=>x.split("x")[0])); const medTxt=(alt.size===1? [...alt][0]+" x "+med.map(x=>x.split("x")[1]).join(" ou ") : med.map(x=>x.replace("x"," x ")).join(" ou "));
     return `<div class="gcard" data-id="${esc(id)}">
-      <div class="gimg" data-abrir><img src="${img(f.f)}" alt="Porta de giro ${esc(nome)} ${esc(corNome(cor))}" loading="lazy"></div>
+      <div class="gimg" data-abrir><img src="${img(f.f)}" alt="Porta de giro ${esc(nome)} ${esc(corNome(cor))}" loading="lazy">${bf?`<span class="tag-bf">Black Friday <b>-10%</b></span>`:""}</div>
       <div class="gin">
         <h3>${esc(nome)}</h3>
         <div class="gcores">${["Branco","Alumínio","Preto"].filter(c=>m.cores.includes(c)).map(c=>`<button type="button" data-cor="${c}" aria-pressed="${c===cor}"><span class="dot ${c}"></span>${c==="Branco"?"Branca":c==="Preto"?"Preta":"Brilhante"}</button>`).join("")}</div>
-        <div class="gpreco"><small>a partir de</small><b class="num">${brl(vistaDe(pmin))} <i class="av">à vista</i></b><span class="num">${txtParc(pmin)}</span><span class="gmed">${esc(medTxt)} m</span></div>
+        ${bf?`<div class="bf-box"><span class="t">Black Friday · 2,10 x 0,80 m</span><span class="de num">de ${brl(cheio(bf.preco))}</span><b class="num">${brl(vistaX(bfx))} <i>à vista</i></b><span class="pz num">ou ${brl(prazoX(bfx))} em ${PARCELAS}x de ${brlC(parcX(bfx))} sem juros</span><span class="obs">À vista no Pix, dinheiro ou débito. ${BF_PERIODO}, enquanto durar o estoque.</span></div>
+        ${outras.length?`<div class="gpreco normal"><small>Outras medidas a partir de ${brl(vistaDe(omin))} à vista (${esc(txtMedidas([...new Set(outras.filter(v=>v.preco===omin).map(v=>v.medida))]))})</small></div>`:""}`:`<div class="gpreco"><small>a partir de</small><b class="num">${brl(vistaDe(pmin))} <i class="av">à vista</i></b><span class="num">${txtParc(pmin)}</span><span class="gmed">${esc(medTxt)} m</span></div>`}
         <button type="button" class="btn-add" data-abrir>Escolher medida</button>
       </div></div>`; }).join("");
 }
 const gg=document.getElementById("giro-g"); gg.innerHTML=giroHTML();
 gg.addEventListener("click",e=>{ const card=e.target.closest(".gcard"); if(!card) return; const id=card.dataset.id;
   const b=e.target.closest("[data-cor]"); if(b){ corGiro[id]=b.dataset.cor; gg.innerHTML=giroHTML(); return; }
-  if(e.target.closest("[data-abrir]")) abrirProduto(id,false,"Premium",corGiro[id]||"Branco"); });
+  if(e.target.closest("[data-abrir]")){ const c=corGiro[id]||"Branco"; abrirProduto(id,false,"Premium",c, bfAtivo()&&BF_CORES.includes(c)?BF_MEDIDA:""); } });
 /* porta de entrada (slide do banner): Premium, sem vidro lateral */
 const ENT_ID="Porta Entrada|Lambril c/ Puxador — Sem Vidro Lateral";
 /* destaque: Porta de Correr 3 Planos, Linha Premium, só na branca sem travessa (os cards e a ficha mostram as três cores) */
@@ -765,6 +808,8 @@ const SLIDES = [
   {eye:"Janelas com o melhor preço", tit:'Linha <em>Intermediária</em>', sub:"Vitrôs e venezianas mais em conta, com foto e preço de cada medida.", im1:"in-05", im2:"in-05", uma:true, tag:"Vitro 4 Folhas branco", valor:vitro4.preco, vista:true, med:txtMedidas([vitro4.medida])+", sem grade", alvo:"intermediaria", cta:"Ver Linha Intermediária"},
   {eye:"Condição de pagamento", tit:'Até <em>10x sem juros</em> no cartão', sub:"Ou 5% de desconto pagando à vista. Entrega em Sorocaba em até 15 dias úteis.", im1:"01-02", im2:"02-02", tag:"Porta de giro brilhante", valor:Math.min(...GIRO.map(([id])=>minCor(id,"Alumínio"))), med:medGiro("Alumínio"), alvo:"giro", cta:"Ver portas de giro"},
 ];
+if(bfAtivo()){ const gb=bfVar(MODELOS.find(m=>m.id==="Porta Giro|Palheta"),"Alumínio");
+  if(gb) SLIDES.unshift({bf:true, eye:"Black Friday Moreira · "+BF_PERIODO, tit:'Portas de giro <em>até 10% off</em>', sub:"Palheta, social e basculante, 2,10 x 0,80 m, na cor branca ou brilhante. 10% à vista no Pix, dinheiro ou débito, ou 5% em até 10x sem juros. Enquanto durar o estoque.", im1:"02-02", im2:"00-02", bfv:{...gb,categoria:"Porta Giro",modelo:"Palheta"}, alvo:"giro", cta:"Ver ofertas"}); }
 let slideAtual=0, slideTimer=null;
 const reduz = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
 function mostraSlide(i, anim){
@@ -775,7 +820,8 @@ function mostraSlide(i, anim){
     document.getElementById("h-sub").textContent=sl.sub;
     document.getElementById("h-im1").src=img(sl.im1); document.getElementById("h-im2").src=img(sl.im2); document.querySelector(".vitrine").classList.toggle("uma",!!sl.uma);
     document.getElementById("h-cta").textContent = sl.cta || "Ver catálogo";
-    document.getElementById("h-preco").innerHTML=`<small>${sl.tag}</small>${sl.vista?`<b class="num">${brl(vistaDe(sl.valor))} <i class="av">à vista</i></b><span class="med">${txtParc(sl.valor)}</span>`:`<b class="num">10x de ${(sl.valor/PARCELAS).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</b><span class="med">sem juros no cartão</span>`}${sl.med?`<span class="med">${sl.med}</span>`:""}`;
+    h.classList.toggle("bf",!!sl.bf);
+    document.getElementById("h-preco").innerHTML= sl.bf ? `<span class="bf-fx">Black Friday</span><small>Brilhante 2,10 x 0,80</small><span class="de num">de ${brl(cheio(sl.bfv.preco))}</span><b class="num">${brl(vistaX(sl.bfv))} <i class="av">à vista</i></b><span class="med num">ou ${brl(prazoX(sl.bfv))} em ${PARCELAS}x de ${brlC(parcX(sl.bfv))}</span>` : `<small>${sl.tag}</small>${sl.vista?`<b class="num">${brl(vistaDe(sl.valor))} <i class="av">à vista</i></b><span class="med">${txtParc(sl.valor)}</span>`:`<b class="num">10x de ${(sl.valor/PARCELAS).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}</b><span class="med">sem juros no cartão</span>`}${sl.med?`<span class="med">${sl.med}</span>`:""}`;
     document.querySelectorAll("#h-pontos button").forEach((b,j)=>b.setAttribute("aria-current",j===i));
     h.classList.remove("trocando");
   };
@@ -833,9 +879,9 @@ function fotoPara(lista, cor, extra){
 
 let linhaAbrir = "", corAbrir = "";
 function abrirProduto(id, viaHash, linha){
-  linhaAbrir = linha || ""; corAbrir = arguments[3] || "";
+  linhaAbrir = linha || ""; corAbrir = arguments[3] || ""; const medAbrir = arguments[4] || "";
   const m = MODELOS.find(x=>x.id===id); if(!m) return;
-  sel = {m, linha: (linhaAbrir && m.linhas.includes(linhaAbrir)) ? linhaAbrir : linhaPadrao(m), cor: (corAbrir && m.cores.includes(corAbrir)) ? corAbrir : m.cores.includes("Branco")?"Branco":m.cores[0], extra: m.extras[0], medida:null, qtd:1, foto:0};
+  sel = {m, linha: (linhaAbrir && m.linhas.includes(linhaAbrir)) ? linhaAbrir : linhaPadrao(m), cor: (corAbrir && m.cores.includes(corAbrir)) ? corAbrir : m.cores.includes("Branco")?"Branco":m.cores[0], extra: m.extras[0], medida:medAbrir||null, qtd:1, foto:0};
   ajustar(m, sel);
   sel.fotos = fotosLinha(m, sel.linha); sel.foto = fotoPara(sel.fotos, sel.cor, sel.extra);
   desenharProduto(true);
@@ -869,7 +915,7 @@ function slider(tr, total, aoMudar, aoTocar){
   return {ir, get idx(){return idx}};
 }
 function desenharProduto(inicial){
-  const {m} = sel, o = ajustar(m, sel), v = varAtual(m, sel);
+  const {m} = sel, o = ajustar(m, sel), v = varAtual(m, sel), vx = v && {...v,categoria:m.categoria,modelo:m.modelo};
   const el = document.getElementById("veu-prod");
   if(inicial){
     el.innerHTML = `
@@ -887,21 +933,21 @@ function desenharProduto(inicial){
     ${linhasVis.length>1 ? botoes("linha", linhasVis, sel.linha, "Linha") : (linhasVis.length?`<div class="grupo"><h3>Linha <em>${esc(linhasVis[0])}</em></h3></div>`:"")}
     ${botoes("cor", o.cores, sel.cor, "Cor")}
     ${m.extras.length ? botoes("extra", o.extras, sel.extra, nomeExtra(m)) : ""}
-    ${botoes("medida", o.medidas, sel.medida, "Medida (altura × largura)")}
+    ${botoes("medida", o.medidas, sel.medida, "Medida (altura × largura)").replace(/(data-k="medida" data-v="([^"]+)"[^>]*>)([^<]+)/g,(t,a,mv,txt)=>ehBF({categoria:m.categoria,modelo:m.modelo,linha:sel.linha,cor:sel.cor,medida:mv})?a+txt+'<i class="bf-mini">BLACK FRIDAY</i>':t)}
     <div class="condicoes">
-      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>${v?`<b class="num">${brl(vistaDe(cheio(v.preco)*sel.qtd))}</b> à vista com 5% de desconto, ou <span class="num">${brl(cheio(v.preco)*sel.qtd)}</span> em ${PARCELAS}x de <span class="num">${brlC(parcelaDe(cheio(v.preco)*sel.qtd))}</span> sem juros`:""}</span></div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg><span>${v&&ehBF(vx)?`<span class="bf-cond"><b>Black Friday:</b> <b class="num">${brl(vistaX(vx,sel.qtd))}</b> à vista no Pix, dinheiro ou débito (10% de desconto), ou <span class="num">${brl(prazoX(vx,sel.qtd))}</span> em ${PARCELAS}x de <span class="num">${brlC(parcX(vx,sel.qtd))}</span> sem juros no cartão (5% de desconto). Preço normal: <span class="num">${brl(cheio(v.preco)*sel.qtd)}</span>. ${BF_PERIODO}, enquanto durar o estoque.</span>`:v?`<b class="num">${brl(vistaDe(cheio(v.preco)*sel.qtd))}</b> à vista com 5% de desconto, ou <span class="num">${brl(cheio(v.preco)*sel.qtd)}</span> em ${PARCELAS}x de <span class="num">${brlC(parcelaDe(cheio(v.preco)*sel.qtd))}</span> sem juros`:""}</span></div>
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Entrega em até 15 dias úteis. Frete de R$ 50 em Sorocaba.</span></div>
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6 6 .9-4.5 4.3 1 6.3L12 16.6 6.5 19.5l1-6.3L3 8.9 9 8z"/></svg><span>Loja física em Sorocaba: Av. Angélica, 844.</span></div>
       <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Foto ilustrativa. O preço vale só para a linha, a cor, a medida e a opção de grade ou travessa escolhidas.</span></div>
     </div>`;
   const desc = [sel.linha!=="—"?"Linha "+sel.linha:"",corNome(sel.cor),m.extras.length?sel.extra:"",sel.medida].filter(Boolean).join(" · ");
   document.getElementById("rodape").innerHTML = `
-    <div class="total-linha"><div class="esq"><span>Total à vista${sel.qtd>1?` (${sel.qtd} unidades)`:""}</span><span class="parc num">${v?`${txtParc(cheio(v.preco)*sel.qtd)} sem juros`:""}</span></div><b>${v?brl(vistaDe(cheio(v.preco)*sel.qtd)):"—"}</b></div>
+    <div class="total-linha"><div class="esq"><span>Total à vista${sel.qtd>1?` (${sel.qtd} unidades)`:""}</span><span class="parc num">${v?`ou ${brl(prazoX(vx,sel.qtd))} em ${PARCELAS}x de ${brlC(parcX(vx,sel.qtd))} sem juros`:""}</span></div><b>${v?brl(vistaX(vx,sel.qtd)):"—"}</b></div>
     <div class="acoes">
       <div class="qtd"><button type="button" data-q="-1" aria-label="Diminuir quantidade">−</button><output class="num">${sel.qtd}</output><button type="button" data-q="1" aria-label="Aumentar quantidade">+</button></div>
       <button type="button" class="btn-add" data-add>Adicionar ao orçamento</button>
     </div>
-    <a class="btn-zap" href="${v?zapLink(`Olá, Moreira! Tenho interesse neste produto:\n\n${sel.qtd}x ${nomeCompleto(m)} — ${desc} — ${brl(vistaDe(cheio(v.preco)*sel.qtd))} à vista ${txtParc(cheio(v.preco)*sel.qtd)} sem juros\n\nPodem confirmar disponibilidade e prazo?`):"#"}" target="_blank" rel="noopener">${ICON_ZAP} Comprar este item pelo WhatsApp</a>`;
+    <a class="btn-zap" href="${v?zapLink(`Olá, Moreira! Tenho interesse neste produto${ehBF(vx)?" da Black Friday":""}:\n\n${sel.qtd}x ${nomeCompleto(m)} — ${desc} — ${brl(vistaX(vx,sel.qtd))} à vista ou ${brl(prazoX(vx,sel.qtd))} em ${PARCELAS}x de ${brlC(parcX(vx,sel.qtd))} sem juros${ehBF(vx)?" (Black Friday)":""}\n\nPodem confirmar disponibilidade e prazo?`):"#"}" target="_blank" rel="noopener">${ICON_ZAP} Comprar este item pelo WhatsApp</a>`;
   marcarFoto();
 }
 let galeria=null;
@@ -979,12 +1025,13 @@ function adicionar(){
 }
 function badge(){ document.getElementById("badge").textContent = carrinho.reduce((s,i)=>s+i.qtd,0); }
 const descItem = i => [i.linha!=="—"?"Linha "+i.linha:"",i.medida,corNome(i.cor),i.extra].filter(Boolean).join(" · ");
-const totalCheio = () => carrinho.reduce((s,i)=>s+cheio(i.preco)*i.qtd,0);
-const totalVista = () => carrinho.reduce((s,i)=>s+vistaDe(cheio(i.preco)*i.qtd),0);
+const totalCheio = () => carrinho.reduce((s,i)=>s+prazoX(i,i.qtd),0);
+const totalVista = () => carrinho.reduce((s,i)=>s+vistaX(i,i.qtd),0);
+const temBF = () => carrinho.some(i=>ehBF(i));
 const FRETE = 50;   /* frete em Sorocaba, somado no total; sem desconto à vista */
 function mensagem(){
-  let t = "Olá, Moreira! Quero um orçamento:\n\n";
-  carrinho.forEach(i=>{ t += `🔹 ${i.qtd}x ${i.categoria} ${i.modelo} — ${descItem(i).replace(/ · /g,", ")} — ${brl(vistaDe(cheio(i.preco)*i.qtd))} à vista\n`; });
+  let t = `Olá, Moreira! Quero um orçamento${temBF()?" (com itens da Black Friday)":""}:\n\n`;
+  carrinho.forEach(i=>{ t += `🔹 ${i.qtd}x ${i.categoria} ${i.modelo} — ${descItem(i).replace(/ · /g,", ")} — ${brl(vistaX(i,i.qtd))} à vista${ehBF(i)?" (Black Friday)":""}\n`; });
   const c = totalCheio()+FRETE, av = totalVista()+FRETE;
   t += `\nProdutos à vista: ${brl(totalVista())}\nFrete (Sorocaba): ${brl(FRETE)}\n\n*Total à vista: ${brl(av)}*\n*Total a prazo: ${brl(c)} em ${PARCELAS}x de ${brlC(c/PARCELAS)} sem juros*\n\nSe for fora de Sorocaba, o frete é a consultar.`;
   return t;
@@ -997,13 +1044,13 @@ function desenharOrc(){
       ${carrinho.length ? `<div class="itens">${carrinho.map((i,n)=>`
         <div class="item">
           ${i.foto?`<img src="${img(i.foto)}" alt="">`:"<span></span>"}
-          <div class="t">${esc(i.categoria)} ${esc(i.modelo)}</div>
+          <div class="t">${esc(i.categoria)} ${esc(i.modelo)}${ehBF(i)?`<span class="bf-it">BLACK FRIDAY</span>`:""}</div>
           <div class="d">${esc(descItem(i))}</div>
-          <div class="p"><b class="num">${brl(vistaDe(cheio(i.preco)*i.qtd))} <i class="av">à vista</i></b><div class="mini"><button type="button" data-i="${n}" data-d="-1" aria-label="Diminuir">−</button><span class="num">${i.qtd}</span><button type="button" data-i="${n}" data-d="1" aria-label="Aumentar">+</button></div></div>
+          <div class="p"><b class="num">${brl(vistaX(i,i.qtd))} <i class="av">à vista</i></b><div class="mini"><button type="button" data-i="${n}" data-d="-1" aria-label="Diminuir">−</button><span class="num">${i.qtd}</span><button type="button" data-i="${n}" data-d="1" aria-label="Aumentar">+</button></div></div>
         </div>`).join("")}</div>
       <div class="rodape">
         <div class="resumo">
-          <div><span class="muted">Produtos à vista (5% de desconto)</span><span class="num">${brl(totalVista())}</span></div>
+          <div><span class="muted">${temBF()?"Produtos à vista (com Black Friday)":"Produtos à vista (5% de desconto)"}</span><span class="num">${brl(totalVista())}</span></div>
           <div><span class="muted">Frete em Sorocaba</span><span class="num">${brl(FRETE)}</span></div>
           <div><span>Total à vista</span><b class="num">${brl(totalVista()+FRETE)}</b></div>
           <div><span class="muted">Ou ${brl(total+FRETE)} em ${PARCELAS}x sem juros</span><span class="num">${PARCELAS}x de ${brlC((total+FRETE)/PARCELAS)}</span></div>
