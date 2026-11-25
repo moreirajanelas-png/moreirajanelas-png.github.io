@@ -637,7 +637,9 @@ const img = (f,p) => `img/${f}${p?"-p":""}.jpg`;
    Fora do site oficial (prévia), a promoção aparece sempre, para conferência. */
 const BF_INICIO = new Date("2026-11-23T00:00:00-03:00"), BF_FIM = new Date("2026-12-01T00:00:00-03:00");
 const BF_PREVIA = !/moreirajanelas-png\.github\.io$/.test(location.hostname);
-const bfAtivo = () => { const n=new Date(); return BF_PREVIA || (n>=BF_INICIO && n<BF_FIM); };
+/* CANCELADA em 24/11/2026 a pedido do Manoel. Para reativar, volte a linha abaixo para a versão comentada. */
+// const bfAtivo = () => { const n=new Date(); return BF_PREVIA || (n>=BF_INICIO && n<BF_FIM); };
+const bfAtivo = () => false;
 const BF_MODELOS = new Set(["Palheta","Social Palheta","Basculante Palheta"]), BF_MEDIDA = "2,10x0,80", BF_CORES = ["Branco","Alumínio"];
 const BF_VISTA = 0.10, BF_PRAZO = 0.05, BF_PERIODO = "23 a 30/11";
 const ehBF = x => !!x && bfAtivo() && x.categoria==="Porta Giro" && BF_MODELOS.has(x.modelo) && x.linha==="Premium" && x.medida===BF_MEDIDA && BF_CORES.includes(x.cor);
