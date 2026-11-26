@@ -1019,6 +1019,13 @@ function abrirZoom(){
 let carrinho = [];
 try{ carrinho = JSON.parse(localStorage.getItem("moreira-orc")||"[]").filter(i=>i&&i.preco) }catch(_){ carrinho=[] }
 const salvar = ()=>{ try{ localStorage.setItem("moreira-orc",JSON.stringify(carrinho)) }catch(_){} };
+/* carrinho salvo no aparelho: ao abrir o site, cada peça pega o preço atual da tabela; peça que saiu do site sai do carrinho */
+carrinho = carrinho.filter(i=>{
+  const m = MODELOS.find(x=>x.id===i.categoria+"|"+i.modelo); if(!m) return false;
+  const v = m.vars.find(v=>v.linha===i.linha&&v.cor===i.cor&&v.medida===i.medida&&(extraValido(v.extra)?v.extra:"")===(i.extra||""));
+  if(!v) return false; i.preco = v.preco; return true;
+});
+salvar();
 function adicionar(){
   const {m} = sel, v = varAtual(m,sel); if(!v) return;
   const id = [m.id,v.linha,v.cor,v.extra,v.medida].join("|");
